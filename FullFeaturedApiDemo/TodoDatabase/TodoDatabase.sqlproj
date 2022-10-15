@@ -62,6 +62,12 @@
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\Todo.sql" />
+    <Build Include="dbo\Stored Procedures\spTodo_GetAll.sql" />
+    <Build Include="dbo\Stored Procedures\spTodo_Get.sql" />
+    <Build Include="dbo\Stored Procedures\spTodo_Create.sql" />
+    <Build Include="dbo\Stored Procedures\spTodo_UpdateTask.sql" />
+    <Build Include="dbo\Stored Procedures\spTodo_Complete.sql" />
+    <Build Include="dbo\Stored Procedures\spTodo_Delete.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="TodoDatabase.refactorlog" />
