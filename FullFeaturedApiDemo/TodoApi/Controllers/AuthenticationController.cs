@@ -67,7 +67,7 @@ public class AuthenticationController : ControllerBase
             var errorOut = string.Empty;
             foreach (var error in result.Errors)
             {
-                errorOut += ", " + error.Description;
+                errorOut += " " + error.Description;
             }
             return BadRequest(errorOut);
         }
