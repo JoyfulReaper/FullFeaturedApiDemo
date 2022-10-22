@@ -21,7 +21,7 @@ public class AuthenticationController : ControllerBase
     private readonly SignInManager<IdentityUser> _signInManager;
     private readonly JwtOptions _jwtOptions;
 
-    public record AuthenticationData(string? UserName, string? Password);
+    public record AuthenticationData(string? UserName, string? Password, string? EmailAddress);
 
     public AuthenticationController(UserManager<IdentityUser> userManager,
         SignInManager<IdentityUser> signInManager,
@@ -45,6 +45,32 @@ public class AuthenticationController : ControllerBase
 
         var token = GenerateToken(user);
         return Ok(token);
+    }
+
+    [AllowAnonymous]
+    [HttpPost("register")]
+    public async Task<IActionResult> Register([FromBody] AuthenticationData auth)
+    {
+        var user = new IdentityUser
+        {
+            UserName = auth.UserName,
+            Email = auth.EmailAddress,
+        };
+
+        var result = await _userManager.CreateAsync(user, auth.Password);
+        if(result.Succeeded)
+        {
+            return NoContent();
+        }
+        else
+        {
+            var errorOut = string.Empty;
+            foreach (var error in result.Errors)
+            {
+                errorOut += ", " + error.Description;
+            }
+            return BadRequest(errorOut);
+        }
     }
 
     private string GenerateToken(IdentityUser user)
