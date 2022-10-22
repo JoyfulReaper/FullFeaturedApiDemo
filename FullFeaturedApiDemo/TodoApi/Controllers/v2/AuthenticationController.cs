@@ -12,8 +12,9 @@ using System.Text;
 using TodoApi.Options;
 using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
-namespace TodoApi.Controllers;
-[Route("api/[controller]")]
+namespace TodoApi.Controllers.v2;
+[Route("api/v{version:apiVersion}/[controller]")]
+[ApiVersion("2.0")]
 [ApiController]
 public class AuthenticationController : ControllerBase
 {
@@ -34,11 +35,11 @@ public class AuthenticationController : ControllerBase
 
     [HttpPost("token")]
     [AllowAnonymous]
-    public async Task <ActionResult<string>> Authenticate([FromBody] AuthenticationData auth)
+    public async Task<ActionResult<string>> Authenticate([FromBody] AuthenticationData auth)
     {
         var user = await ValidateCredentials(auth);
 
-        if(user is null)
+        if (user is null)
         {
             return Unauthorized();
         }
@@ -58,7 +59,7 @@ public class AuthenticationController : ControllerBase
         };
 
         var result = await _userManager.CreateAsync(user, auth.Password);
-        if(result.Succeeded)
+        if (result.Succeeded)
         {
             return NoContent();
         }
@@ -101,7 +102,7 @@ public class AuthenticationController : ControllerBase
     {
         IdentityUser user = await _userManager.FindByNameAsync(auth.UserName);
         SignInResult result = await _signInManager.CheckPasswordSignInAsync(user, auth.Password, true);
-        if(result.Succeeded)
+        if (result.Succeeded)
         {
             return user;
         }

@@ -21,7 +21,7 @@ public static class SwaggerSetup
 
             opts.SwaggerDoc("v1", new OpenApiInfo
             {
-                Version = "v1",
+                Version = "v1 (deprecated)",
                 Title = $"{title} v1",
                 Description = description,
                 TermsOfService = terms,
