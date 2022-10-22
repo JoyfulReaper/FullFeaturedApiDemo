@@ -11,6 +11,7 @@ builder.AddAuthenticationAndAuthorization();
 builder.AddAndSetupSwagger();
 builder.AddAndSetupIdentity();
 builder.AddAndSetupCors();
+builder.AddTodoServices();
 
 // Pre-made Health Checks and such
 // https://github.com/Xabaril/AspNetCore.Diagnostics.HealthChecks
@@ -54,6 +55,8 @@ app.MapHealthChecks("/health", new HealthCheckOptions
 {
     ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
 }).AllowAnonymous();
+
+// https://localhost:7131/healthchecks-ui
 app.MapHealthChecksUI()
     .AllowAnonymous();
 
