@@ -1,3 +1,6 @@
+using HealthChecks.UI.Client;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using TodoApi.HealthChecks;
 using TodoApi.Options;
 using TodoApi.ServiceSetup;
 
@@ -8,6 +11,19 @@ builder.AddAuthenticationAndAuthorization();
 builder.AddAndSetupSwagger();
 builder.AddAndSetupIdentity();
 builder.AddAndSetupCors();
+
+// Pre-made Health Checks and such
+// https://github.com/Xabaril/AspNetCore.Diagnostics.HealthChecks
+builder.Services.AddHealthChecks()
+    .AddCheck<DemoHealthCheck>("Demo Health Check");
+
+// AspNetCore.HealthChecks.UI
+builder.Services.AddHealthChecksUI(opts =>
+{
+    opts.AddHealthCheckEndpoint("api", "/health");
+    opts.SetEvaluationTimeInSeconds(30);
+    opts.SetMinimumSecondsBetweenFailureNotifications(60);
+}).AddInMemoryStorage();
 
 // Options
 builder.Services.Configure<JwtOptions>(
@@ -34,4 +50,11 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHealthChecks("/health", new HealthCheckOptions
+{
+    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+}).AllowAnonymous();
+app.MapHealthChecksUI()
+    .AllowAnonymous();
+
 app.Run();
