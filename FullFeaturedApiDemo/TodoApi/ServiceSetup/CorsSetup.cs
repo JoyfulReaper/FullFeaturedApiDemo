@@ -8,8 +8,10 @@ public static class CorsSetup
     {
         builder.Services.AddCors(opts =>
         {
+            var origin = builder.Configuration.GetValue<string>("CorsOrigin");
+
             opts.AddDefaultPolicy(builder =>
-                builder.WithOrigins("")
+                builder.WithOrigins(origin)
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials()

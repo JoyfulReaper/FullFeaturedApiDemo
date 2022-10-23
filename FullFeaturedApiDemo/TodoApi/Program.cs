@@ -1,6 +1,5 @@
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using TodoApi.HealthChecks;
 using TodoApi.Options;
 using TodoApi.ServiceSetup;
 
@@ -11,24 +10,18 @@ builder.Services.Configure<JwtOptions>(
     builder.Configuration.GetSection(JwtOptions.Jwt));
 
 builder.Services.AddControllers();
+builder.Services.AddMemoryCache();
+
 builder.AddAndSetupSwagger();
 builder.AddAndSetupIdentity();
 builder.AddAuthenticationAndAuthorization();
 builder.AddAndSetupCors();
 builder.AddTodoServices();
+builder.AddAndSetupHealthChecks();
+builder.AddAndSetupRateLimiting();
 
-// Pre-made Health Checks and such
-// https://github.com/Xabaril/AspNetCore.Diagnostics.HealthChecks
-builder.Services.AddHealthChecks()
-    .AddCheck<DemoHealthCheck>("Demo Health Check");
+// Rate Limiting: https://github.com/stefanprodan/AspNetCoreRateLimit
 
-// AspNetCore.HealthChecks.UI
-builder.Services.AddHealthChecksUI(opts =>
-{
-    opts.AddHealthCheckEndpoint("api", "/health");
-    opts.SetEvaluationTimeInSeconds(30);
-    opts.SetMinimumSecondsBetweenFailureNotifications(60);
-}).AddInMemoryStorage();
 
 var app = builder.Build();
 
