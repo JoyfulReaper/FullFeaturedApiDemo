@@ -27,6 +27,10 @@ public class TodoController : ControllerBase
         return userId;
     }
 
+    /// <summary>
+    /// Get all todos for the logged in user
+    /// </summary>
+    /// <returns>All todos for the logged in user</returns>
     [HttpGet(Name = "GetAllTodos")]
     public async Task<ActionResult<List<Todo>>> Get()
     {

@@ -6,10 +6,14 @@ using TodoApi.ServiceSetup;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Options
+builder.Services.Configure<JwtOptions>(
+    builder.Configuration.GetSection(JwtOptions.Jwt));
+
 builder.Services.AddControllers();
-builder.AddAuthenticationAndAuthorization();
 builder.AddAndSetupSwagger();
 builder.AddAndSetupIdentity();
+builder.AddAuthenticationAndAuthorization();
 builder.AddAndSetupCors();
 builder.AddTodoServices();
 
@@ -25,11 +29,6 @@ builder.Services.AddHealthChecksUI(opts =>
     opts.SetEvaluationTimeInSeconds(30);
     opts.SetMinimumSecondsBetweenFailureNotifications(60);
 }).AddInMemoryStorage();
-
-// Options
-builder.Services.Configure<JwtOptions>(
-    builder.Configuration.GetSection(JwtOptions.Authentication));
-
 
 var app = builder.Build();
 

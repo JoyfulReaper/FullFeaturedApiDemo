@@ -1,4 +1,5 @@
 ﻿using Microsoft.OpenApi.Models;
+using System.Reflection;
 
 namespace TodoApi.ServiceSetup;
 
@@ -7,6 +8,32 @@ public static class SwaggerSetup
     public static void AddAndSetupSwagger(this WebApplicationBuilder builder)
     {
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+        var securityScheme = new OpenApiSecurityScheme
+        {
+            Name = "Authorization",
+            Description = "JWT Authorization header info using bearer tokens",
+            In = ParameterLocation.Header,
+            Type = SecuritySchemeType.Http,
+            Scheme = "bearer",
+            BearerFormat = "JWT"
+        };
+
+        var securityRequirement = new OpenApiSecurityRequirement
+        {
+            {
+                new OpenApiSecurityScheme
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "bearerAuth"
+                    }
+                },
+                new string[] { }
+            }
+        };
+
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen(opts =>
         {
@@ -36,6 +63,12 @@ public static class SwaggerSetup
                 TermsOfService = terms,
                 License = License
             });
+
+            var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            opts.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFile));
+
+            opts.AddSecurityDefinition("bearerAuth", securityScheme);
+            opts.AddSecurityRequirement(securityRequirement);
         });
 
         builder.Services.AddApiVersioning(opts =>

@@ -59,6 +59,7 @@
     <Folder Include="dbo" />
     <Folder Include="dbo\Stored Procedures" />
     <Folder Include="dbo\Tables" />
+    <Folder Include="dbo\Publish Profiles\" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\Todo.sql" />
@@ -71,5 +72,8 @@
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="TodoDatabase.refactorlog" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="dbo\Publish Profiles\TodoDatabase.publish.xml" />
   </ItemGroup>
 </Project>
