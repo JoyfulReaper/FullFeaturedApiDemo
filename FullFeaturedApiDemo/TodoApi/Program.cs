@@ -1,6 +1,8 @@
 using AspNetCoreRateLimit;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using MinimalApi.EndPoints;
+using TodoApi.EndPoints;
 using TodoApi.Options;
 using TodoApi.ServiceSetup;
 
@@ -44,6 +46,10 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Minimal Endpoint example
+app.AddAuthenticationEndPoints();
+app.AddTodoEndpoints();
 app.MapHealthChecks("/health", new HealthCheckOptions
 {
     ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
