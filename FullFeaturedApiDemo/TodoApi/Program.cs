@@ -1,3 +1,4 @@
+using AspNetCoreRateLimit;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using TodoApi.Options;
@@ -51,5 +52,7 @@ app.MapHealthChecks("/health", new HealthCheckOptions
 // https://localhost:7131/healthchecks-ui
 app.MapHealthChecksUI()
     .AllowAnonymous();
+
+app.UseIpRateLimiting();
 
 app.Run();
