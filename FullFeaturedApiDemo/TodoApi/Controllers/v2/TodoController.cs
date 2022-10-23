@@ -9,6 +9,7 @@ namespace TodoApi.Controllers.v2;
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiVersion("2.0")]
 [ApiController]
+[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 public class TodoController : ControllerBase
 {
     private readonly ITodoData _todoData;
@@ -32,6 +33,9 @@ public class TodoController : ControllerBase
     /// </summary>
     /// <returns>All todos for the logged in user</returns>
     [HttpGet(Name = "GetAllTodos")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Todo))]
+
     public async Task<ActionResult<List<Todo>>> Get()
     {
         _logger.LogInformation("GET: api/Todos");
@@ -39,7 +43,6 @@ public class TodoController : ControllerBase
         try
         {
             var output = await _todoData.GetAll(GetUserId());
-
             return Ok(output);
         }
         catch (Exception ex)
@@ -49,7 +52,10 @@ public class TodoController : ControllerBase
         }
     }
 
-    [HttpGet("{todoId}", Name = "GetOneTodo")]
+    [HttpGet("{todoId}", Name = "GetTodo")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Todo))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<Todo>> Get(int todoId)
     {
         _logger.LogInformation("GET: api/Todos/{TodoId}", todoId);
@@ -57,6 +63,10 @@ public class TodoController : ControllerBase
         try
         {
             var output = await _todoData.Get(GetUserId(), todoId);
+            if(output == null)
+            {
+                return NotFound();
+            }
 
             return Ok(output);
         }
@@ -70,6 +80,8 @@ public class TodoController : ControllerBase
     }
 
     [HttpPost(Name = "CreateTodo")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(Todo))]
     public async Task<ActionResult<Todo>> Post([FromBody] string task)
     {
         _logger.LogInformation("POST: api/Todos (Task: {Task}", task);
@@ -77,7 +89,7 @@ public class TodoController : ControllerBase
         try
         {
             var output = await _todoData.Create(GetUserId(), task);
-            return Ok(output);
+            return CreatedAtAction(nameof(Get), output);
         }
         catch (Exception ex)
         {
@@ -87,6 +99,8 @@ public class TodoController : ControllerBase
     }
 
     [HttpPut("{todoId}", Name = "UpdateTodoTask")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> Put(int todoId, [FromBody] string task)
     {
         _logger.LogInformation("PUT: api/Todos/{TodoId} (Task: {Task}", todoId, task);
@@ -104,6 +118,8 @@ public class TodoController : ControllerBase
     }
 
     [HttpPut("{todoId}/Complete", Name = "CompleteTodo")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> Complete(int todoId)
     {
         _logger.LogInformation("PUT: api/Todos/{TodoId}/Complete ", todoId);
@@ -121,6 +137,8 @@ public class TodoController : ControllerBase
     }
 
     [HttpDelete("{todoId}", Name = "DeleteTodo")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> Delete(int todoId)
     {
         _logger.LogInformation("DELETE: api/Todos/{TodoId} ", todoId);

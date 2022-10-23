@@ -13,6 +13,7 @@ namespace TodoApi.Controllers.v2;
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiVersion("2.0")]
 [ApiController]
+[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 public class AuthenticationController : ControllerBase
 {
     private readonly UserManager<IdentityUser> _userManager;
@@ -30,7 +31,8 @@ public class AuthenticationController : ControllerBase
         _jwtOptions = jwtOptions.Value;
     }
 
-    [HttpPost("token")]
+    [HttpPost("token", Name = "GetToken")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
     [AllowAnonymous]
     public async Task<ActionResult<string>> Authenticate([FromBody] AuthenticationData auth)
     {
@@ -46,7 +48,9 @@ public class AuthenticationController : ControllerBase
     }
 
     [AllowAnonymous]
-    [HttpPost("register")]
+    [HttpPost("register", Name = "Register")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Register([FromBody] AuthenticationData auth)
     {
         var user = new IdentityUser
