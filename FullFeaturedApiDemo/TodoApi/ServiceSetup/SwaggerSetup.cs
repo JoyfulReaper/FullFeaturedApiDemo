@@ -40,10 +40,16 @@ public static class SwaggerSetup
             var title = "Fully Featured Demo API";
             var description = "Demo API demonstrating the usage of Identity, JWT Bearer Tokens, API Versioning, Health Checks, Rate Limiting and probably more!";
             var terms = new Uri("https://opensource.org/licenses/MIT");
-            var License = new OpenApiLicense()
+            var license = new OpenApiLicense()
             {
                 Name = "MIT",
                 Url = new Uri("https://opensource.org/licenses/MIT"),
+            };
+
+            OpenApiContact contact = new()
+            {
+                Name = "Kyle Givler",
+                Url = new Uri("https://github.com/JoyfulReaper/ProgrammingResources")
             };
 
             opts.SwaggerDoc("v1", new OpenApiInfo
@@ -52,7 +58,8 @@ public static class SwaggerSetup
                 Title = $"{title} v1",
                 Description = description,
                 TermsOfService = terms,
-                License = License
+                License = license,
+                Contact = contact
             });
 
             opts.SwaggerDoc("v2", new OpenApiInfo
