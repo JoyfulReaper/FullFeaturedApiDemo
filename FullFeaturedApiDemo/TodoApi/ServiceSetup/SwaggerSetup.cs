@@ -68,7 +68,7 @@ public static class SwaggerSetup
                 Title = $"{title} v2",
                 Description = description,
                 TermsOfService = terms,
-                License = License
+                License = license
             });
 
             var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";

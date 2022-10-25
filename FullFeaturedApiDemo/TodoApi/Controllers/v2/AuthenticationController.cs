@@ -92,7 +92,7 @@ public class AuthenticationController : ControllerBase
             _jwtOptions.Audience,
             claims,
             DateTime.UtcNow,
-            DateTime.UtcNow.AddMinutes(10),
+            DateTime.UtcNow.AddMinutes(_jwtOptions.ExpirationMinutes),
             signingCredentials);
 
         return new JwtSecurityTokenHandler()

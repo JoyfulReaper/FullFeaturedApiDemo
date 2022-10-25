@@ -4,7 +4,8 @@ public class JwtOptions
 {
     public const string Jwt = "Jwt";
 
-    public string SecretKey { get; set; } = String.Empty;
-    public string Issuer { get; set; } = String.Empty;
-    public string Audience { get; set; } = String.Empty;
+    public string SecretKey { get; set; } = string.Empty;
+    public string Issuer { get; set; } = string.Empty;
+    public string Audience { get; set; } = string.Empty;
+    public int ExpirationMinutes { get; set; }
 }
