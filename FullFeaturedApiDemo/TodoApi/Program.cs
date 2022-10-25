@@ -50,6 +50,7 @@ app.MapControllers();
 // Minimal Endpoint example
 app.AddAuthenticationEndPoints();
 app.AddTodoEndpoints();
+
 app.MapHealthChecks("/health", new HealthCheckOptions
 {
     ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse

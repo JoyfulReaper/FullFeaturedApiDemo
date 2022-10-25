@@ -35,7 +35,7 @@ public static class AuthenticationSetup
                 ValidIssuer = jwtOptions.Issuer,
                 ValidAudience = jwtOptions.Audience,
                 IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.ASCII.GetBytes(jwtOptions.SecretKey))
+                    Encoding.ASCII.GetBytes(jwtOptions.SecretKey))
             };
         });
     }
