@@ -1,11 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using System.Xml.Linq;
 using TodoLibrary;
 using TodoLibrary.DataAccess;
 
 namespace TodoApi.Controllers.v2;
+
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiVersion("2.0")]
 [ApiController]
@@ -22,9 +21,13 @@ public class TodoController : ControllerBase
         _logger = logger;
     }
 
-    private string? GetUserId()
+    private string GetUserId()
     {
         var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+        if (userId is null)
+        {
+            throw new Exception("Unable to get the Id of the currently logged in user.");
+        }
         return userId;
     }
 
@@ -89,7 +92,11 @@ public class TodoController : ControllerBase
         try
         {
             var output = await _todoData.Create(GetUserId(), task);
-            return CreatedAtAction(nameof(Get), output);
+            if(output is null)
+            {
+                throw new Exception("Failed retrieve saved Todo item.");
+            }
+            return CreatedAtAction(nameof(Get), new {todoId = output.TodoId}, output);
         }
         catch (Exception ex)
         {
