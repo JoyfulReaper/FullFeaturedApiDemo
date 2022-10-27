@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using TodoApi.Identity;
 using TodoApi.Models;
+using TodoApi.Options;
 using TodoApi.Services;
 using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
@@ -19,17 +21,20 @@ public class AuthenticationController : ControllerBase
     private readonly UserManager<ApiIdentityUser> _userManager;
     private readonly SignInManager<ApiIdentityUser> _signInManager;
     private readonly ITokenService _tokenService;
+    private readonly JwtOptions _jwtOptions;
 
     public record RegistrationRecord(string? UserName, string? Password, string? EmailAddress);
     public record LoginRecord(string? UserName, string? Password);
 
     public AuthenticationController(UserManager<ApiIdentityUser> userManager,
         SignInManager<ApiIdentityUser> signInManager,
-        ITokenService tokenService)
+        ITokenService tokenService,
+        IOptions<JwtOptions> jwtOptions)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _tokenService = tokenService;
+        _jwtOptions = jwtOptions.Value;
     }
 
     [HttpPost("token", Name = "GetToken")]
@@ -47,7 +52,7 @@ public class AuthenticationController : ControllerBase
         var token = GenerateToken(user);
         var refreshToken = _tokenService.GenerateRefreshToken();
         user.RefreshToken = refreshToken;
-        user.RefreshTokenExpiryTime = DateTime.Now.AddDays(7); // TODO: put in appsettings
+        user.RefreshTokenExpiryTime = DateTime.Now.AddDays(_jwtOptions.RefreshExpirationDays);
         await _userManager.UpdateAsync(user);
 
         return Ok(new AuthenticatedResponse

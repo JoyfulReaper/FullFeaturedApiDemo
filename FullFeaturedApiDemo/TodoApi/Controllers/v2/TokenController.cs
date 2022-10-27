@@ -2,8 +2,10 @@
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using TodoApi.Identity;
 using TodoApi.Models;
+using TodoApi.Options;
 using TodoApi.Services;
 
 namespace TodoApi.Controllers.v2;
@@ -16,12 +18,15 @@ public class TokenController : ControllerBase
 {
     private readonly ITokenService _tokenService;
     private readonly UserManager<ApiIdentityUser> _userManager;
+    private readonly JwtOptions _jwtOptions;
 
     public TokenController(ITokenService tokenService,
-        UserManager<ApiIdentityUser> userManager)
+        UserManager<ApiIdentityUser> userManager,
+        IOptions<JwtOptions> jwtOptions)
 	{
         _tokenService = tokenService;
         _userManager = userManager;
+        _jwtOptions = jwtOptions.Value;
     }
 
     [HttpPost("refresh")]
@@ -50,7 +55,7 @@ public class TokenController : ControllerBase
         var newAccessToken = _tokenService.GenerateAccessToken(principal.Claims);
         var newRefreshToken = _tokenService.GenerateRefreshToken();
         user.RefreshToken = newRefreshToken;
-        user.RefreshTokenExpiryTime = DateTime.Now.AddDays(7); // TODO: Put in app settings
+        user.RefreshTokenExpiryTime = DateTime.Now.AddDays(_jwtOptions.RefreshExpirationDays);
 
         await _userManager.UpdateAsync(user);
         return Ok(new AuthenticatedResponse()
