@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Identity;
 using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
+using TodoApi.Identity;
 
 namespace MinimalApi.EndPoints;
 
@@ -16,8 +17,8 @@ public static class AuthenticationEndpoint
     {
         app.MapPost("/api/token", async (IConfiguration config, 
             [FromBody] AuthenticationData data, 
-            SignInManager<IdentityUser> signingManager,
-            UserManager<IdentityUser> userManager) =>
+            SignInManager<ApiIdentityUser> signingManager,
+            UserManager<ApiIdentityUser> userManager) =>
         {
             var user = await ValidateCredentials(data, signingManager, userManager);
 
@@ -56,11 +57,11 @@ public static class AuthenticationEndpoint
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-    private async static Task<IdentityUser?> ValidateCredentials(AuthenticationData auth, 
-        SignInManager<IdentityUser> signInManager, 
-        UserManager<IdentityUser> userManager)
+    private async static Task<ApiIdentityUser?> ValidateCredentials(AuthenticationData auth, 
+        SignInManager<ApiIdentityUser> signInManager, 
+        UserManager<ApiIdentityUser> userManager)
     {
-        IdentityUser user = await userManager.FindByNameAsync(auth.UserName);
+        ApiIdentityUser user = await userManager.FindByNameAsync(auth.UserName);
         SignInResult result = await signInManager.CheckPasswordSignInAsync(user, auth.Password, true);
 
         if (result.Succeeded)

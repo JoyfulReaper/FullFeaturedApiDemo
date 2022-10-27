@@ -1,42 +1,43 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text;
-using TodoApi.Options;
+using TodoApi.Identity;
+using TodoApi.Models;
+using TodoApi.Services;
 using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 namespace TodoApi.Controllers.v2;
+
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiVersion("2.0")]
 [ApiController]
 [ProducesResponseType(StatusCodes.Status401Unauthorized)]
 public class AuthenticationController : ControllerBase
 {
-    private readonly UserManager<IdentityUser> _userManager;
-    private readonly SignInManager<IdentityUser> _signInManager;
-    private readonly JwtOptions _jwtOptions;
+    private readonly UserManager<ApiIdentityUser> _userManager;
+    private readonly SignInManager<ApiIdentityUser> _signInManager;
+    private readonly ITokenService _tokenService;
 
-    public record AuthenticationData(string? UserName, string? Password, string? EmailAddress);
+    public record RegistrationRecord(string? UserName, string? Password, string? EmailAddress);
+    public record LoginRecord(string? UserName, string? Password);
 
-    public AuthenticationController(UserManager<IdentityUser> userManager,
-        SignInManager<IdentityUser> signInManager,
-        IOptions<JwtOptions> jwtOptions)
+    public AuthenticationController(UserManager<ApiIdentityUser> userManager,
+        SignInManager<ApiIdentityUser> signInManager,
+        ITokenService tokenService)
     {
         _userManager = userManager;
         _signInManager = signInManager;
-        _jwtOptions = jwtOptions.Value;
+        _tokenService = tokenService;
     }
 
     [HttpPost("token", Name = "GetToken")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
     [AllowAnonymous]
-    public async Task<ActionResult<string>> Authenticate([FromBody] AuthenticationData auth)
+    public async Task<ActionResult<string>> Authenticate([FromBody] LoginRecord loginRec)
     {
-        var user = await ValidateCredentials(auth);
+        var user = await ValidateCredentials(loginRec);
 
         if (user is null)
         {
@@ -44,16 +45,25 @@ public class AuthenticationController : ControllerBase
         }
 
         var token = GenerateToken(user);
-        return Ok(token);
+        var refreshToken = _tokenService.GenerateRefreshToken();
+        user.RefreshToken = refreshToken;
+        user.RefreshTokenExpiryTime = DateTime.Now.AddDays(7); // TODO: put in appsettings
+        await _userManager.UpdateAsync(user);
+
+        return Ok(new AuthenticatedResponse
+        {
+            Token = token,
+            RefreshToken = refreshToken,
+        });
     }
 
     [AllowAnonymous]
     [HttpPost("register", Name = "Register")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Register([FromBody] AuthenticationData auth)
+    public async Task<IActionResult> Register([FromBody] RegistrationRecord auth)
     {
-        var user = new IdentityUser
+        var user = new ApiIdentityUser
         {
             UserName = auth.UserName,
             Email = auth.EmailAddress,
@@ -75,34 +85,28 @@ public class AuthenticationController : ControllerBase
         }
     }
 
-    private string GenerateToken(IdentityUser user)
+    private string GenerateToken(ApiIdentityUser user)
     {
-        var secretKey = new SymmetricSecurityKey(
-            Encoding.ASCII.GetBytes(
-                _jwtOptions.SecretKey));
+        List<Claim> claims = new List<Claim>
+        {
+            new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+            new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName),
+            new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+        };
 
-        var signingCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
-
-        List<Claim> claims = new List<Claim>();
-        claims.Add(new Claim(JwtRegisteredClaimNames.Sub, user.Id));
-        claims.Add(new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName));
-
-        var token = new JwtSecurityToken(
-            _jwtOptions.Issuer,
-            _jwtOptions.Audience,
-            claims,
-            DateTime.UtcNow,
-            DateTime.UtcNow.AddMinutes(_jwtOptions.ExpirationMinutes),
-            signingCredentials);
-
-        return new JwtSecurityTokenHandler()
-            .WriteToken(token);
+        return _tokenService.GenerateAccessToken(claims);
     }
 
-    private async Task<IdentityUser?> ValidateCredentials(AuthenticationData auth)
+    private async Task<ApiIdentityUser?> ValidateCredentials(LoginRecord loginRec)
     {
-        IdentityUser user = await _userManager.FindByNameAsync(auth.UserName);
-        SignInResult result = await _signInManager.CheckPasswordSignInAsync(user, auth.Password, true);
+        ApiIdentityUser user = await _userManager.FindByNameAsync(loginRec.UserName);
+        if(user is null)
+        {
+            return null;
+        }
+
+        SignInResult result = await _signInManager.CheckPasswordSignInAsync(user, loginRec.Password, true);
         if (result.Succeeded)
         {
             return user;

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using MinimalApi.EndPoints;
 using TodoApi.EndPoints;
 using TodoApi.Options;
+using TodoApi.Services;
 using TodoApi.ServiceSetup;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,16 +16,15 @@ builder.Services.Configure<JwtOptions>(
 builder.Services.AddControllers();
 builder.Services.AddMemoryCache();
 
-builder.AddAndSetupSwagger();
-builder.AddAndSetupIdentity();
+builder.AddSwagger();
+builder.AddIdentity();
 builder.AddAuthenticationAndAuthorization();
-builder.AddAndSetupCors();
+builder.AddCors();
 builder.AddTodoServices();
-builder.AddAndSetupHealthChecks();
-builder.AddAndSetupRateLimiting();
+builder.AddHealthChecks();
+builder.AddRateLimiting();
 
-// Rate Limiting: https://github.com/stefanprodan/AspNetCoreRateLimit
-
+builder.Services.AddTransient<ITokenService, TokenService>();
 
 var app = builder.Build();
 

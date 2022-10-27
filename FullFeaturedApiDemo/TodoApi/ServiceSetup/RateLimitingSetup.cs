@@ -4,7 +4,8 @@ namespace TodoApi.ServiceSetup;
 
 public static class RateLimitingSetup
 {
-    public static void AddAndSetupRateLimiting(this WebApplicationBuilder builder)
+    // Rate Limiting: https://github.com/stefanprodan/AspNetCoreRateLimit
+    public static void AddRateLimiting(this WebApplicationBuilder builder)
     {
         builder.Services.Configure<IpRateLimitOptions>(builder.Configuration.GetSection("IpRateLimiting"));
         builder.Services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();

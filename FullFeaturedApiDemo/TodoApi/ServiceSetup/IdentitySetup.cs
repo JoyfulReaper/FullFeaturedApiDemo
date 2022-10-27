@@ -7,7 +7,7 @@ namespace TodoApi.ServiceSetup;
 
 public static class IdentitySetup
 {
-    public static void AddAndSetupIdentity(this WebApplicationBuilder builder)
+    public static void AddIdentity(this WebApplicationBuilder builder)
     {
         // Identity
         builder.Services.AddDbContext<IdentityContext>(opts =>
@@ -17,7 +17,7 @@ public static class IdentitySetup
                 );
         });
 
-        builder.Services.AddIdentity<IdentityUser, IdentityRole>(opts =>
+        builder.Services.AddIdentity<ApiIdentityUser, IdentityRole>(opts =>
         {
             opts.SignIn.RequireConfirmedAccount = false;
         }).AddEntityFrameworkStores<IdentityContext>()

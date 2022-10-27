@@ -4,7 +4,7 @@ namespace TodoApi.ServiceSetup;
 
 public static class CorsSetup
 {
-    public static void AddAndSetupCors(this WebApplicationBuilder builder)
+    public static void AddCors(this WebApplicationBuilder builder)
     {
         builder.Services.AddCors(opts =>
         {

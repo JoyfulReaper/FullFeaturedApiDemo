@@ -4,7 +4,7 @@ namespace TodoApi.ServiceSetup;
 
 public static class HealthCheckSetup
 {
-    public static void AddAndSetupHealthChecks(this WebApplicationBuilder builder)
+    public static void AddHealthChecks(this WebApplicationBuilder builder)
     {
         // Pre-made Health Checks and such
         // https://github.com/Xabaril/AspNetCore.Diagnostics.HealthChecks
