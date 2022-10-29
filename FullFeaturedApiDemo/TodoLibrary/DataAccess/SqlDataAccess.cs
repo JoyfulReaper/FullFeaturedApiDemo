@@ -1,39 +1,30 @@
 ﻿using Dapper;
 using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
+using Microsoft.Extensions.Options;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace TodoLibrary.DataAccess;
 
 public class SqlDataAccess : ISqlDataAccess
 {
-    private readonly IConfiguration _config;
+    private readonly TodoOptions _options;
 
-    public SqlDataAccess(IConfiguration config)
+    public SqlDataAccess(IOptions<TodoOptions> options)
     {
-        _config = config;
+        _options = options.Value;
     }
 
-    public async Task<IEnumerable<T>> Query<T, U>(string storedProcedure, U parameters, string connectionStringName)
+    public async Task<IEnumerable<T>> Query<T, U>(string storedProcedure, U parameters)
     {
-        string connectionString = _config.GetConnectionString(connectionStringName);
-
-        using IDbConnection connection = new SqlConnection(connectionString);
+        using IDbConnection connection = new SqlConnection(_options.ConnectionString);
         var rows = await connection.QueryAsync<T>(storedProcedure, parameters, commandType: CommandType.StoredProcedure);
 
         return rows.ToList();
     }
 
-    public async Task Execute<T>(string storedProcedure, T Parameters, string connectionStringName)
+    public async Task Execute<T>(string storedProcedure, T Parameters)
     {
-        string connectionString = _config.GetConnectionString(connectionStringName);
-
-        using IDbConnection connection = new SqlConnection(connectionString);
+        using IDbConnection connection = new SqlConnection(_options.ConnectionString);
         await connection.ExecuteAsync(storedProcedure, Parameters, commandType: CommandType.StoredProcedure);
     }
 }

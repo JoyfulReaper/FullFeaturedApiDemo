@@ -6,6 +6,7 @@ using TodoApi.EndPoints;
 using TodoApi.Options;
 using TodoApi.Services;
 using TodoApi.ServiceSetup;
+using TodoLibrary;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,10 +21,13 @@ builder.AddSwagger();
 builder.AddIdentity();
 builder.AddAuthenticationAndAuthorization();
 builder.AddCors();
-builder.AddTodoServices();
 builder.AddHealthChecks();
 builder.AddRateLimiting();
 
+builder.Services.AddTodoServices(opts =>
+{
+    opts.ConnectionString = builder.Configuration.GetConnectionString("TodoApiData");
+});
 builder.Services.AddTransient<ITokenService, TokenService>();
 
 var app = builder.Build();

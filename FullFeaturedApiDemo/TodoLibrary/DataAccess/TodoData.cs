@@ -20,7 +20,7 @@ public class TodoData : ITodoData
         return _sqlDataAccess.Query<Todo, dynamic>("dbo.spTodo_GetAll", new
         {
             ownerId
-        }, "TodoApiData");
+        });
     }
 
     public async Task<Todo?> Get(string ownerId, int todoId)
@@ -29,7 +29,7 @@ public class TodoData : ITodoData
         {
             ownerId,
             todoId
-        }, "TodoApiData"))
+        }))
         .FirstOrDefault();
     }
 
@@ -39,7 +39,7 @@ public class TodoData : ITodoData
         {
             ownerId,
             task
-        }, "TodoApiData"))
+        }))
         .FirstOrDefault();
     }
 
@@ -50,7 +50,7 @@ public class TodoData : ITodoData
             ownerId,
             todoId,
             task
-        }, "TodoApiData");
+        });
     }
 
     public Task Complete(string ownerId, int todoId)
@@ -59,7 +59,7 @@ public class TodoData : ITodoData
         {
             ownerId,
             todoId
-        }, "TodoApiData");
+        });
     }
 
     public Task Delete(string ownerId, int todoId)
@@ -68,6 +68,6 @@ public class TodoData : ITodoData
         {
             ownerId,
             todoId
-        }, "TodoApiData");
+        });
     }
 }
